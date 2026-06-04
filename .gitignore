@@ -3,8 +3,9 @@ __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
-*.env
 .env
+pauseandbuy.jks
+*.jks
 pause_and_buy_data.json
 .vscode/
 .DS_Store

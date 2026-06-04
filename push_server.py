@@ -2,11 +2,23 @@ from flask import Flask, request, jsonify, send_from_directory
 from pywebpush import webpush, WebPushException
 import json
 import os
+from dotenv import load_dotenv
+
+# load .env if present
+load_dotenv()
 
 # Set these environment variables or edit directly (not recommended for production)
 VAPID_PRIVATE_KEY = os.environ.get('VAPID_PRIVATE_KEY')
+VAPID_PRIVATE_KEY_FILE = os.environ.get('VAPID_PRIVATE_KEY_FILE')
 VAPID_PUBLIC_KEY = os.environ.get('VAPID_PUBLIC_KEY')
 VAPID_CLAIMS = {"sub": "mailto:you@example.com"}
+
+if not VAPID_PRIVATE_KEY and VAPID_PRIVATE_KEY_FILE:
+    try:
+        with open(VAPID_PRIVATE_KEY_FILE, 'r', encoding='utf-8') as f:
+            VAPID_PRIVATE_KEY = f.read()
+    except FileNotFoundError:
+        VAPID_PRIVATE_KEY = None
 
 app = Flask(__name__, static_folder='web', static_url_path='')
 
