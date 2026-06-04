@@ -1,0 +1,14 @@
+{
+  "manifestUrl": "https://YOUR_DOMAIN/manifest.json",
+  "applicationId": "com.example.pauseandbuy",
+  "signingKey": {
+    "path": "./keystore.jks",
+    "alias": "pauseandbuy",
+    "storePassword": "YOUR_STORE_PASSWORD",
+    "keyPassword": "YOUR_KEY_PASSWORD"
+  },
+  "fallbackType": "customtabs",
+  "name": "Pause & Buy",
+  "shortName": "PauseBuy",
+  "host": "YOUR_DOMAIN"
+}

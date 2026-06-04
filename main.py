@@ -39,22 +39,22 @@ def main(page: ft.Page):
             
             if now >= deadline:
                 time_str = "Čas vypršal! Je moment pravdy."
-                time_color = ft.colors.GREEN_600
+                time_color = ft.Colors.GREEN_600
             else:
                 remaining = deadline - now
                 hours, remainder = divmod(remaining.seconds, 3600)
                 minutes, _ = divmod(remainder, 60)
                 # Zobrazenie v tvare: Dni, hodiny, minúty
                 time_str = f"Zostáva: {remaining.days}d {hours}h {minutes}m"
-                time_color = ft.colors.RED_ACCENT
+                time_color = ft.Colors.RED_ACCENT
 
             # Tlačidlá na interakciu (Odkaz na e-shop)
             trailing_actions = []
             if item.get("url"):
                 trailing_actions.append(
                     ft.IconButton(
-                        icon=ft.icons.LINK,
-                        icon_color=ft.colors.BLUE_700,
+                        icon=ft.icons.Icons.LINK,
+                        icon_color=ft.Colors.BLUE_700,
                         url=item["url"],
                         tooltip="Otvoriť obchod"
                     )
@@ -66,20 +66,20 @@ def main(page: ft.Page):
                         content=ft.Column(
                             [
                                 ft.ListTile(
-                                    leading=ft.Icon(ft.icons.SHOPPING_BAG, color=ft.colors.BLUE_ACCENT),
+                                    leading=ft.Icon(ft.icons.Icons.SHOPPING_BAG, color=ft.Colors.BLUE_ACCENT),
                                     title=ft.Text(item["name"], weight=ft.FontWeight.BOLD, size=18),
                                     subtitle=ft.Text(f"Cena: {item['price']} €", size=16),
                                     trailing=ft.Row(trailing_actions, wrap=False) if trailing_actions else None
                                 ),
-                                ft.Padding(
-                                    ft.Row(
-                                        [
-                                            ft.Icon(ft.icons.TIMER, color=time_color, size=16),
-                                            ft.Text(time_str, color=time_color, weight=ft.FontWeight.W_500),
-                                        ]
-                                    ),
-                                    padding=ft.padding.only(left=16, bottom=16)
-                                )
+                                                        ft.Container(
+                                                            content=ft.Row(
+                                                                [
+                                                                    ft.Icon(ft.icons.Icons.TIMER, color=time_color, size=16),
+                                                                    ft.Text(time_str, color=time_color, weight=ft.FontWeight.W_500),
+                                                                ]
+                                                            ),
+                                                            padding=ft.Padding(left=16, bottom=16)
+                                                        )
                             ]
                         ),
                         padding=5,
@@ -115,30 +115,64 @@ def main(page: ft.Page):
     item_name = ft.TextField(label="Čo si chceš kúpiť?", expand=True, border_radius=10)
     item_price = ft.TextField(label="Cena (€)", width=100, keyboard_type=ft.KeyboardType.NUMBER, border_radius=10)
     item_url = ft.TextField(label="Odkaz na web (voliteľné)", expand=True, border_radius=10)
-    
     add_button = ft.FloatingActionButton(
-        icon=ft.icons.ADD, 
-        on_click=add_clicked, 
-        bgcolor=ft.colors.BLUE_ACCENT, 
-        icon_color=ft.colors.WHITE
+        icon=ft.Icon(ft.icons.Icons.ADD, color=ft.Colors.WHITE),
+        on_click=add_clicked,
+        bgcolor=ft.Colors.BLUE_ACCENT,
     )
+
+    # Responsive containers (we'll switch their content on resize)
+    input_container = ft.Container(padding=10)
+    url_container = ft.Container(padding=10)
+    header_container = ft.Container(content=ft.Text("Aktuálne pokušenia v čakárni:", size=16, weight=ft.FontWeight.W_600), padding=ft.Padding(left=15, top=10))
+
+    # Adjust layout according to window width (mobile-first)
+    def adjust_layout():
+        # determine available width
+        width = None
+        if hasattr(page, 'window_width') and page.window_width:
+            width = page.window_width
+        elif hasattr(page, 'width') and page.width:
+            width = page.width
+        elif hasattr(page, 'window_size') and getattr(page, 'window_size'):
+            try:
+                width = page.window_size.width
+            except Exception:
+                width = None
+        if width is None:
+            width = 400
+
+        # threshold for mobile vs desktop
+        mobile_threshold = 600
+        if width <= mobile_threshold:
+            input_container.content = ft.Column([item_name, item_price], spacing=8)
+            url_container.content = ft.Column([item_url])
+        else:
+            input_container.content = ft.Row([item_name, item_price], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
+            url_container.content = ft.Row([item_url])
+
+        page.update()
+
+    # Set handler and initial layout
+    page.on_resize = lambda e: adjust_layout()
 
     # Poskladanie celej aplikácie
     page.add(
         ft.AppBar(
-            title=ft.Text("Pause & Buy", color=ft.colors.WHITE, weight=ft.FontWeight.BOLD),
-            bgcolor=ft.colors.BLUE_900,
+            title=ft.Text("Pause & Buy", color=ft.Colors.WHITE, weight=ft.FontWeight.BOLD),
+            bgcolor=ft.Colors.BLUE_900,
             center_title=True
         ),
-        ft.Padding(ft.Row([item_name, item_price], alignment=ft.MainAxisAlignment.SPACE_BETWEEN), padding=10),
-        ft.Padding(ft.Row([item_url]), padding=10),
-        ft.Padding(ft.Text("Aktuálne pokušenia v čakárni:", size=16, weight=ft.FontWeight.W_600), padding=ft.padding.only(left=15, top=10)),
+        input_container,
+        url_container,
+        header_container,
         items_list,
         add_button
     )
     
     # Prvé vykreslenie zoznamu pri načítaní appky
     build_list()
+    adjust_layout()
 
 # Spustenie aplikácie
 ft.app(target=main)
