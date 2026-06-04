@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.env
+.env
+pause_and_buy_data.json
+.vscode/
+.DS_Store
+Thumbs.db
